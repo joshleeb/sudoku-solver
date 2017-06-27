@@ -1,8 +1,8 @@
-#include <algorithm>
+#include "interface.h"
+
 #include <istream>
 #include <vector>
 
-#include "interface.h"
 #include "puzzle.h"
 
 std::vector<int> interface::read_board(std::istream& stream) {
