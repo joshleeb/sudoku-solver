@@ -5,6 +5,8 @@
 #include <stdexcept>
 #include <vector>
 
+#include <boost/algorithm/cxx11/any_of.hpp>
+
 puzzle::puzzle(std::vector<int> board) {
     this->board = board;
     this->fixed_squares = {};
@@ -55,8 +57,7 @@ int puzzle::get_board_width() {
 }
 
 bool puzzle::is_fixed_square(int index) {
-    (void)index;
-    return false;
+    return boost::algorithm::any_of_equal(this->fixed_squares, index);
 }
 
 std::vector<int> puzzle::get_moves(int index) {
