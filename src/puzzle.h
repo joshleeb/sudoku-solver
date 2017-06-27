@@ -31,4 +31,5 @@ private:
     bool is_fixed_square(int index);
 
     std::vector<int> get_moves(int index);
+    inline int get_index(int row, int col);
 };
