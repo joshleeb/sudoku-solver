@@ -13,7 +13,6 @@ public:
     void display();
 
     bool is_valid();
-    bool is_solved();
 
     std::vector<int> get_board();
     int get_board_width();

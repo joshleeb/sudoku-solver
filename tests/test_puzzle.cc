@@ -92,32 +92,3 @@ SCENARIO("checking if puzzle is valid", "[puzzle]") {
         }
     }
 }
-
-SCENARIO("checking if puzzle is solved", "[puzzle]") {
-    GIVEN("a solved puzzle") {
-        puzzle new_puzzle(
-            std::vector<int>{2, 1, 4, 3, 4, 3, 2, 1, 3, 2, 1, 4, 1, 4, 3, 2});
-
-        THEN("should return true") {
-            REQUIRE(new_puzzle.is_solved());
-        }
-    }
-
-    GIVEN("an unsolved puzzle with blanks") {
-        puzzle new_puzzle(
-            std::vector<int>{-1, 1, 4, 3, 4, 3, 2, 1, 3, 2, 1, 4, 1, 4, 3, -1});
-
-        THEN("should return false") {
-            REQUIRE_FALSE(new_puzzle.is_solved());
-        }
-    }
-
-    GIVEN("an unsolved puzzle without blanks") {
-        puzzle new_puzzle(
-            std::vector<int>{2, 1, 4, 3, 4, 3, 2, 1, 3, 2, 1, 4, 1, 4, 2, 3});
-
-        THEN("should return false") {
-            REQUIRE_FALSE(new_puzzle.is_solved());
-        }
-    }
-}
