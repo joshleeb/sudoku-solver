@@ -3,15 +3,18 @@
 #include <cmath>
 #include <iostream>
 #include <stdexcept>
+#include <utility>
 #include <vector>
+#include <numeric>
 
 #include <boost/algorithm/cxx11/any_of.hpp>
 
 puzzle::puzzle(std::vector<int> board) {
     this->board = board;
-    this->fixed_squares = {};
-
     this->board_width = std::sqrt(board.size());
+
+    this->fixed_squares = {};
+    this->attempts = std::vector<std::vector<int>>(board.size());
 
     // Set fixed squares.
     for (int i = 0; i < (int)board.size(); i++) {
@@ -20,6 +23,34 @@ puzzle::puzzle(std::vector<int> board) {
 }
 
 void puzzle::solve() {
+    int index = 0;
+    std::vector<int> moves;
+
+    while (!this->is_solved() && index >= 0 && index < std::pow(this->board_width, 2)) {
+        if (this->is_fixed_square(index)) {
+            index++;
+            continue;
+        }
+
+        moves = this->get_moves(index);
+
+        // If there are no available moves, backtrack to try a different branch.
+        if (moves.empty()) {
+            do {
+                if (!this->is_fixed_square(index)) {
+                    this->board[index] = BLANK;
+                    this->attempts[index].clear();
+                }
+                index--;
+            } while (this->is_fixed_square(index));
+
+            continue;
+        }
+
+        this->board[index] = moves[0];
+        this->attempts[index].push_back(moves[0]);
+        index++;
+    }
 }
 
 void puzzle::display() {
@@ -38,6 +69,7 @@ void puzzle::display() {
         }
         std::cout << "\n";
     }
+    std::cout << "\n";
 }
 
 bool puzzle::is_valid() {
@@ -88,8 +120,8 @@ bool puzzle::is_solved() {
         if (col != solved) return false;
     }
 
-    // TODO: Check regions.
-
+    // We could also check each region is solved but for brevity I will assume
+    // that just checking the rows and columns is enough.
     return true;
 }
 
@@ -102,14 +134,66 @@ int puzzle::get_board_width() {
 }
 
 bool puzzle::is_fixed_square(int index) {
-    return boost::algorithm::any_of_equal(this->fixed_squares, index);
+    return !boost::algorithm::any_of_equal(this->fixed_squares, index);
 }
 
 std::vector<int> puzzle::get_moves(int index) {
-    (void)index;
-    return {};
+    std::vector<int> seen{};
+
+    int row = this->get_row(index);
+    int col = this->get_column(index);
+    int board_index;
+
+    // Add items in rows and columns.
+    for (int i = 0; i < this->board_width; i++) {
+        for (int j = 0; j < this->board_width; j++) {
+            board_index = this->get_index(i, j);
+
+            if (this->board[board_index] == BLANK) continue;
+            if (i == row) seen.push_back(this->board[board_index]);
+            if (j == col) seen.push_back(this->board[board_index]);
+        }
+    }
+
+    int region_width = (int)std::sqrt(this->board_width);
+    int start_row = row - (row % region_width);
+    int start_column = col - (col % region_width);
+
+    // Range of the columns that form the region.
+    std::pair<int, int> col_range =
+        std::make_pair(start_column, start_column + region_width - 1);
+
+    // Range of the rows that form the region.
+    std::pair<int, int> row_range =
+        std::make_pair(start_row, start_row + region_width - 1);
+
+    // Add items in region.
+    for (int i = row_range.first; i <= row_range.second; i++) {
+        for (int j = col_range.first; j <= col_range.second; j++) {
+            board_index = this->get_index(i, j);
+            if (this->board[board_index] != BLANK) {
+                seen.push_back(this->board[board_index]);
+            }
+        }
+    }
+
+    std::vector<int> possible_moves(this->board_width);
+    std::iota(possible_moves.begin(), possible_moves.end(), 1);
+
+    // Take the difference of the set of possible squares that can be placed and
+    // the squares that were seen. Then remove the set of attempted moves, for
+    // that index, from the set of available moves.
+    auto available_moves = vec_difference(possible_moves, seen);
+    return vec_difference(available_moves, this->attempts[index]);
 }
 
-inline int puzzle::get_index(int row, int col) {
-    return row * this->board_width + col;
+std::vector<int> vec_difference(std::vector<int> a, std::vector<int> b) {
+    std::vector<int> result;
+
+    std::sort(a.begin(), a.end());
+    std::sort(b.begin(), b.end());
+
+    std::set_difference(a.begin(), a.end(), b.begin(), b.end(),
+                        std::back_inserter(result));
+    return result;
 }
