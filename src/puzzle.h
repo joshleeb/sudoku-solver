@@ -32,17 +32,9 @@ private:
 
     bool is_fixed_square(int index);
 
-    inline int get_index(int row, int col) {
-        return row * this->board_width + col;
-    }
-
-    inline int get_row(int index) {
-        return index / this->board_width;
-    }
-
-    inline int get_column(int index) {
-        return index % this->board_width;
-    }
+    inline int get_index(int row, int col) { return row * this->board_width + col; }
+    inline int get_row(int index) { return index / this->board_width; }
+    inline int get_column(int index) { return index % this->board_width; }
 };
 
 std::vector<int> vec_difference(std::vector<int> a, std::vector<int> b);

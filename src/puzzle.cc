@@ -1,11 +1,12 @@
 #include "puzzle.h"
 
+#include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <numeric>
 #include <stdexcept>
 #include <utility>
 #include <vector>
-#include <numeric>
 
 #include <boost/algorithm/cxx11/any_of.hpp>
 
@@ -160,7 +161,7 @@ std::vector<int> vec_difference(std::vector<int> a, std::vector<int> b) {
     std::sort(a.begin(), a.end());
     std::sort(b.begin(), b.end());
 
-    std::set_difference(a.begin(), a.end(), b.begin(), b.end(),
-                        std::back_inserter(result));
+    std::set_difference(
+        a.begin(), a.end(), b.begin(), b.end(), std::back_inserter(result));
     return result;
 }
